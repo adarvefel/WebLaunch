@@ -16,16 +16,38 @@ jobs:
         uses: Cyb3r-Jak3/html5-validator-action@v1
         with:
           file: index.html
-          
-deploy:
-  needs: validate-html
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout del código
-      uses: actions/checkout@v3
 
-    - name: Configurar GitHub Pages
-      uses: actions/configure-pages@v3
+  validate-css:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
 
-    - name: Publicar en GitHub Pages
-      uses: actions/upload-pages-artifact@v2
+      - name: Validar CSS
+        uses: docker://sideshowcoder/cssoffender
+        with:
+          file: styles.css
+
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+
+      - name: Comprobar enlaces rotos
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: --verbose index.html
+
+  deploy:
+    needs: [validate-html, validate-css, check-links]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v3
+
+      - name: Publicar en GitHub Pages
+        uses: actions/upload-pages-artifact@v2
